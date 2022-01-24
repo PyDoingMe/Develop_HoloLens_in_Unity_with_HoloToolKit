@@ -363,3 +363,33 @@ _아직 이해가 더 필요함_
 3. OnPreCull() : 카메라 컬링 시 1회 호출. Update의 역할을 하고, 매 호출마다 renderViewportScale을 CurrentScale값으로 만든다.
 4. QualityChangedEvent(int newQuality, int previousQuality) : 퀼리티 변경 시 1회 호출되는 걸로 추정.
 5. private void SetScaleFromQuality(int quality) : AdaptiveQuality.cs에서 받은 QualityLevel값을 renderViewportScale의 값에 알맞게 전환해줌.
+<br>
+
+AdaptiveQualityExample.cs
+```cs
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using UnityEngine;
+using HoloToolkit.Unity;
+
+public class AdaptiveQualityExample : MonoBehaviour
+{
+    public TextMesh Text;
+    public AdaptiveQuality Quality;
+
+    private void Update()
+    {
+        Text.text = string.Format("GPUTime:{0:N2}\nQualityLevel:{1}\nViewportScale:{2:N2}",
+            GpuTiming.GetTime("Frame") * 1000.0f,
+            Quality.QualityLevel,
+#if UNITY_2017_2_OR_NEWER
+            UnityEngine.XR.XRSettings.renderViewportScale);
+#else
+            UnityEngine.VR.VRSettings.renderViewportScale);
+#endif
+    }
+}
+```
+__코드 설명__
+1. AdaptiveQuality에서 Frame, QualityLevel값을 받아오고, renderViewportScale과 함께 TextMesh에 출력한다.
