@@ -55,7 +55,7 @@ HoloToolKit를 이용한 Unity - HoloLens 가이드
 <br>
 
 ### Scripts
-HoloToolkit-Example에 나오는 순서대로 소개한다.
+HoloToolkit-Example에 나오는 순서대로 소개한다. 
 #### Adaptive Quality
 ---
 이 예제는 기기 사향과 어플리케이션의 리소스 사용에 따라 적응형으로 게임의 퀄리티가 변하게 하는 법에 대해 소개한다. GpuTimingCamera 컴포넌트와 frame rate와 refresh rate를 계산해서 알맞은 퀄리티를 도출하는 기능의 AdaptiveQuality.cs와 이를 적용하는 AdaptivViewport.cs, 마지막으로 이를 출력하는 AdaptiveQualityExample.cs로 구성되어 있다.
