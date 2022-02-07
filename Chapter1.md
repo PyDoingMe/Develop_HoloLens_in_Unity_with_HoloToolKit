@@ -55,7 +55,7 @@ HoloToolKit를 이용한 Unity - HoloLens 가이드
 <br>
 
 ### Scripts
-HoloToolkit-Example에 나오는 순서대로 소개한다. 
+HoloToolkit-Example에 나오는 순서대로 소개한다.
 #### Adaptive Quality
 ---
 이 예제는 기기 사향과 어플리케이션의 리소스 사용에 따라 적응형으로 게임의 퀄리티가 변하게 하는 법에 대해 소개한다. GpuTimingCamera 컴포넌트와 frame rate와 refresh rate를 계산해서 알맞은 퀄리티를 도출하는 기능의 AdaptiveQuality.cs와 이를 적용하는 AdaptivViewport.cs, 마지막으로 이를 출력하는 AdaptiveQualityExample.cs로 구성되어 있다.
@@ -393,3 +393,91 @@ public class AdaptiveQualityExample : MonoBehaviour
 ```
 __코드 설명__
 1. AdaptiveQuality에서 Frame, QualityLevel값을 받아오고, renderViewportScale과 함께 TextMesh에 출력한다.
+
+#### Color Picker
+---
+이 예제는 플레이어의 시선 끝에 있는 오브젝트의 텍스쳐 색 정보를 매 프레임마다 보여준다. 이 코드는 Color뿐만 아니라 다른 동적 유니티 이벤트를 구현할 때 참고할 수 있는 좋은 예제라고 한다.
+
+[Gazeable Color Picker.cs](https://codedocs.xyz/ubcemergingmedialab/ARDesign/class_holo_toolkit_1_1_examples_1_1_color_picker_1_1_gazeable_color_picker.html)
+```cs
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using HoloToolkit.Unity.InputModule;
+using UnityEngine;
+using UnityEngine.Events;
+
+namespace HoloToolkit.Examples.ColorPicker
+{
+    public class GazeableColorPicker : MonoBehaviour, IFocusable, IInputClickHandler
+    {
+        public Renderer rendererComponent;
+
+        [System.Serializable]
+        public class PickedColorCallback : UnityEvent<Color> { }
+
+        public PickedColorCallback OnGazedColor = new PickedColorCallback();
+        public PickedColorCallback OnPickedColor = new PickedColorCallback();
+
+        private bool gazing = false;
+
+        private void Update()
+        {
+            if (gazing == false) return;
+            UpdatePickedColor(OnGazedColor);
+        }
+
+        private void UpdatePickedColor(PickedColorCallback cb)
+        {
+            RaycastHit hit = GazeManager.Instance.HitInfo;
+
+            if (hit.transform.gameObject != rendererComponent.gameObject) { return; }
+
+            var texture = (Texture2D)rendererComponent.material.mainTexture;
+
+            Vector2 pixelUV = hit.textureCoord;
+            pixelUV.x *= texture.width;
+            pixelUV.y *= texture.height;
+
+            Color col = texture.GetPixel((int)pixelUV.x, (int)pixelUV.y);
+            cb.Invoke(col);
+        }
+
+        public void OnFocusEnter()
+        {
+            gazing = true;
+        }
+
+        public void OnFocusExit()
+        {
+            gazing = false;
+        }
+
+        public void OnInputClicked(InputClickedEventData eventData)
+        {
+            UpdatePickedColor(OnPickedColor);
+        }
+    }
+}
+```
+> __파라미터 정리__
+> 이름 | 뜻 
+> --- | ---  
+> rendererComponent | 색을 골라낼 랜더러 오브젝트
+> PickedColorCallback | 유니티이벤트Color가 담긴 클래스 
+> OnGazedColor | 바라보고 있는 색을 표기할 이미지 오브젝트
+> OnPickedColor | 커서가 눌렸을 때 바라보고 있는 색을 표기할 이미지 오브젝트
+> gazing | 바라보는 오브젝트가 있으면 True, 없으면 False
+
+__코드 설명__
++ UpdatePickedColor(x)
+   + x에는 OnGazedColor 혹은 OnPickedColor가 들어간다.
+   + 플레이어가 바라보는 방향으로 레이케스팅을 한다.
+   + 만약 레이케스팅에 렌더러 오브젝트가 안 잡히면 리턴하고 아니면 계속한다.
+   + 레이케스팅 된 좌표에 상응하는 텍스쳐 좌표의 픽셀 색상을 리턴한다.
++ Update()
+   + gazing이 true면 UpdatePickedColor를 호출하고 OnGazedColor에 리턴한다.
++ OnFocusEnter(), OnFocusExit()
+   + Enter면 gazing이 true, Exit면 false가 된다.
+ + OnInputClicked(x)
+   + UpdatePickedColor를 호출하고 OnPickedColor에 리턴한다.
