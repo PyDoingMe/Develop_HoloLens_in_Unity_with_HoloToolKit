@@ -4,7 +4,7 @@ HoloToolKit를 이용한 Unity - HoloLens 가이드
 
 ### 개발 환경 조성
 
-#### Hololens 1을 Unity로 개발하기 위한 환경 조성에 관한 내용이다.
+#### Hololens 1의 Unity 개발 환경 조성
 ---
 1. __필수 조건__
    + Windows 10
@@ -55,7 +55,7 @@ HoloToolKit를 이용한 Unity - HoloLens 가이드
 <br>
 
 ### Scripts
-HoloToolkit-Example에 나오는 순서대로 소개한다.
+HoloToolkit-Example에 나오는 예제 씬에 대해 설명한다.
 #### Adaptive Quality
 ---
 이 예제는 기기 사향과 어플리케이션의 리소스 사용에 따라 적응형으로 게임의 퀄리티가 변하게 하는 법에 대해 소개한다. GpuTimingCamera 컴포넌트와 frame rate와 refresh rate를 계산해서 알맞은 퀄리티를 도출하는 기능의 AdaptiveQuality.cs와 이를 적용하는 AdaptivViewport.cs, 마지막으로 이를 출력하는 AdaptiveQualityExample.cs로 구성되어 있다.
@@ -393,6 +393,7 @@ public class AdaptiveQualityExample : MonoBehaviour
 ```
 __코드 설명__
 1. AdaptiveQuality에서 Frame, QualityLevel값을 받아오고, renderViewportScale과 함께 TextMesh에 출력한다.
+<br>
 
 #### Color Picker
 ---
@@ -481,3 +482,205 @@ __코드 설명__
    + Enter면 gazing이 true, Exit면 false가 된다.
  + OnInputClicked(x)
    + UpdatePickedColor를 호출하고 OnPickedColor에 리턴한다.
+<br>
+
+#### GazeRulerExample
+GazeRuler는 거리와 면적을 측정하는 데 사용할 수 있는 예제다. 게이즈와 공간맵핑을 기반으로 하며 음성 명령과 제스처로 조작한다.
+
+[DeleteLine.cs](https://codedocs.xyz/ubcemergingmedialab/ARDesign/class_holo_toolkit_1_1_examples_1_1_gaze_ruler_1_1_delete_line.html)
+```cs
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using UnityEngine;
+using System.Collections;
+
+namespace HoloToolkit.Examples.GazeRuler
+{
+    public class DeleteLine : MonoBehaviour
+    {
+        /// <summary>
+        /// when tip text is tapped, destroy this tip and relative objects.
+        /// </summary>
+        public void OnSelect()
+        {
+            var parent = gameObject.transform.parent.gameObject;
+            if (parent != null)
+            {
+                Destroy(parent);
+            }
+        }
+    }
+}
+```
+__코드설명__
++ OnSelect()
+  + 이 코드가 들어간 오브젝트가 탭될 때, 이 오브젝트를 삭제.
+<br>
+
+[MeasureManager.cs](https://codedocs.xyz/ubcemergingmedialab/ARDesign/class_holo_toolkit_1_1_examples_1_1_gaze_ruler_1_1_measure_manager.html)
+```cs
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using UnityEngine;
+using System.Collections;
+using HoloToolkit.Unity;
+using System.Collections.Generic;
+using System;
+using HoloToolkit.Unity.InputModule;
+
+namespace HoloToolkit.Examples.GazeRuler
+{
+    /// <summary>
+    /// manager all measure tools here
+    /// </summary>
+    public class MeasureManager : Singleton<MeasureManager>, IHoldHandler, IInputClickHandler
+    {
+        private IGeometry manager;
+        public GeometryMode Mode;
+
+        // set up prefabs
+        public GameObject LinePrefab;
+        public GameObject PointPrefab;
+        public GameObject ModeTipObject;
+        public GameObject TextPrefab;
+
+        private void Start()
+        {
+            InputManager.Instance.PushFallbackInputHandler(gameObject);
+
+            // inti measure mode
+            switch (Mode)
+            {
+                case GeometryMode.Polygon:
+                    manager = PolygonManager.Instance;
+                    break;
+                default:
+                    manager = LineManager.Instance;
+                    break;
+            }
+        }
+
+        // place spatial point
+        public void OnSelect()
+        {
+            manager.AddPoint(LinePrefab, PointPrefab, TextPrefab);
+        }
+
+        // delete latest line or geometry
+        public void DeleteLine()
+        {
+            manager.Delete();
+        }
+
+        // delete all lines or geometry
+        public void ClearAll()
+        {
+            manager.Clear();
+        }
+
+        // if current mode is geometry mode, try to finish geometry
+        public void OnPolygonClose()
+        {
+            IPolygonClosable client = PolygonManager.Instance;
+            client.ClosePolygon(LinePrefab, TextPrefab);
+        }
+
+        // change measure mode
+        public void OnModeChange()
+        {
+            try
+            {
+                manager.Reset();
+                if (Mode == GeometryMode.Line)
+                {
+                    Mode = GeometryMode.Polygon;
+                    manager = PolygonManager.Instance;
+                }
+                else
+                {
+                    Mode = GeometryMode.Line;
+                    manager = LineManager.Instance;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Log(ex.Message);
+            }
+            ModeTipObject.SetActive(true);
+        }
+
+        public void OnHoldStarted(HoldEventData eventData)
+        {
+            OnPolygonClose();
+        }
+
+        public void OnHoldCompleted(HoldEventData eventData)
+        {
+            // Nothing to do
+        }
+
+        public void OnHoldCanceled(HoldEventData eventData)
+        {
+            // Nothing to do
+        }
+
+    public void OnInputClicked(InputClickedEventData eventData)
+    {
+        OnSelect();
+    }
+}
+
+    public class Point
+    {
+        public Vector3 Position { get; set; }
+
+        public GameObject Root { get; set; }
+        public bool IsStart { get; set; }
+    }
+
+
+    public enum GeometryMode
+    {
+        Line,
+        Triangle,
+        Rectangle,
+        Cube,
+        Polygon
+    }
+}
+```
+__코드 설명__
+> 이름 | 뜻 
+> --- | ---  
+> manager | IGeometry 인터페이스
+> Mode | 라인모드 / 폴리곤 모드
+> LinePrefab | 포인트 사이를 이어주는 오브젝트
+> PointPrefab | 커서가 눌린 위치를 표기하는 오브젝트
+> ModeTipObject | 모드를 보여주는 오브젝트
+> TextPrefab | 길이를 보여주는 오브젝트
++ Start()
+  + InputManage의 fallback input stack에 해당 오브젝트를 넣음
+  + 모든 input handler에서 event를 넣어줄 수 있음
+  + Mode에 따라 manager에 다른 인스턴스를 할당함
++ OnSelect()
+  + 그리기
++ Delete()
+  + 지우기
++ ClearAll()
+  + 모두 지우기
++ OnPolygonClose()
+  + 폴리곤 모드일 때 그리기 끝내기
++ OnModeChange()
+  + 모드 바꾸기
++ OnHoldStarted(HoldEventData eventData)
++ OnHoldCompleted(HoldEventData eventData)
++ OnHoldCanceled(HoldEventData eventData)
+  + 위 3개는 폴리곤 모드 시 작동
++ OnInputClicked(InputClickedEventData eventData)
+  + 라인 모드 시 작동
++ class Point
+  + 클릭 시 마다 생성되는 객체, 노드의 기능을 한다.
++ enum GeometryMode
+  + 모드의 이름이 담김
