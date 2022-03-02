@@ -254,7 +254,7 @@ namespace HoloToolkit.Unity
 
 __코드 설명__
 1. 활성화 시, QualityLevel, RefreshRate, frameTimeQuota, adaptiveCamera의 값을 할당하며, GpuTimingCamera도 생성한다.
-2. 매 프레임마다 UpdateAdaptiveQuality()가 반복된다. 현재 프레임에 이상이 없거나, lastFrames에 쌓인 프레임 샘플이 충분하거나, 충분한 프레임이 지났다면, 퀄리티를 올릴 지, 내릴 지 아무 행동하지 않을 지 판단한다.
+2. 매 프레임마다 UpdateAdaptiveQuality()가 반복된다. 현재 프레임에 이상이 없거나, lastFrames에 쌓인 프레임 샘플이 충분하거나, 충분한 프레임이 지났다면, 퀄리티를 올릴 지, 내릴 지 아무 행동하지 않을 지 판단한다. 
 3. QualityChangedEvent를 호출해서 2에서 내린 판단에 맞는 Quality 값을 AdaptiveViewport.cs로 전달한다.
 <br>
 
