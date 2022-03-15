@@ -10,6 +10,7 @@ HoloToolKit를 이용한 Unity - HoloLens 가이드
    + Windows 10
    + Visual Studio 2015 +
    + Unity 5 + _(2019까지만 지원)_
+   + 설정 - 업데이트 및 보안 - 개발자용 - 개발자 모드 - 켬
 2. __선택 조건__
    + [HoloLens (1st gen) Emulator](https://go.microsoft.com/fwlink/?linkid=2065980)
    > + 둘 중 하나만 설치하면 된다
@@ -52,6 +53,21 @@ HoloToolKit를 이용한 Unity - HoloLens 가이드
    + Clear Flags : Solid Color
    + Background : #00000000
    + Clipping Planes - Near : 0.85 _(유동적으로)_
+
+#### Visual Studio Setup
+---
+1. __설치__
+   + 유니버설 Windows 플랫폼 개발
+   + C++을 사용한 데스크톱 개발
+   + .NET 데스크톱 개발
+2. __릴리즈 세팅__
+   + 솔루션 구성 : Release
+   + 솔루션 플랫폼 : x84
+   + 원격컴퓨터 - 수동 주소 입력 - 홀로랜즈 개발자 설정 - pair - 출력되는 핀번호 입력
+
+#### HoloLens Setup
+---
+1. __개발자 모드 켜기__
 <br>
 
 ### Scripts
@@ -63,8 +79,6 @@ HoloToolkit-Example에 나오는 예제 씬에 대해 설명한다.
 
 [Adaptive Quality.cs](https://codedocs.xyz/ubcemergingmedialab/ARDesign/class_holo_toolkit_1_1_unity_1_1_adaptive_quality.html)
 ```cs
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See LICENSE in the project root for license information.
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -254,7 +268,7 @@ namespace HoloToolkit.Unity
 
 __코드 설명__
 1. 활성화 시, QualityLevel, RefreshRate, frameTimeQuota, adaptiveCamera의 값을 할당하며, GpuTimingCamera도 생성한다.
-2. 매 프레임마다 UpdateAdaptiveQuality()가 반복된다. 현재 프레임에 이상이 없거나, lastFrames에 쌓인 프레임 샘플이 충분하거나, 충분한 프레임이 지났다면, 퀄리티를 올릴 지, 내릴 지 아무 행동하지 않을 지 판단한다. 
+2. 매 프레임마다 UpdateAdaptiveQuality()가 반복된다. 현재 프레임에 이상이 없거나, lastFrames에 쌓인 프레임 샘플이 충분하거나, 충분한 프레임이 지났다면, 퀄리티를 올릴 지, 내릴 지 아무 행동하지 않을 지 판단한다.
 3. QualityChangedEvent를 호출해서 2에서 내린 판단에 맞는 Quality 값을 AdaptiveViewport.cs로 전달한다.
 <br>
 
@@ -401,9 +415,6 @@ __코드 설명__
 
 [Gazeable Color Picker.cs](https://codedocs.xyz/ubcemergingmedialab/ARDesign/class_holo_toolkit_1_1_examples_1_1_color_picker_1_1_gazeable_color_picker.html)
 ```cs
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See LICENSE in the project root for license information.
-
 using HoloToolkit.Unity.InputModule;
 using UnityEngine;
 using UnityEngine.Events;
